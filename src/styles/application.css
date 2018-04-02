@@ -1,0 +1,28 @@
+.checker-square {
+	/* stage size (400)/8 spaces */
+	-fx-min-height:  67px;
+	-fx-min-width:   67px;
+	-fx-pref-height: 67px;
+	-fx-pref-width:  67px;
+	-fx-max-height:  67px;
+	-fx-max-width:   67px;
+	
+	/* prevent rounded buttons */
+	-fx-background-radius: 0em;
+}
+
+.checker-square-white {
+	-fx-background-color: white;
+}
+
+.checker-square-black {
+	-fx-background-color: black;
+}
+
+.checker-square-active {
+	-fx-background-color: yellow;
+}
+
+.checker-square-legal-suggestion {
+	-fx-background-color: green;
+}
