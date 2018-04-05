@@ -1,9 +1,11 @@
-package com.ai.game;
+package com.game.checkers.moves;
+
+import com.game.checkers.components.Square;
 
 public class Move {
 
-	protected static enum MoveType {
-		JUMP, NORMAL;
+	public static enum MoveType {
+		JUMP, REGULAR;
 	}
 
 	private Square src, dest;
@@ -39,4 +41,11 @@ public class Move {
 	public void setDest(Square dest) {
 		this.dest = dest;
 	}
+
+	@Override
+	public String toString() {
+		return "Move [src=" + src + ", dest=" + dest + ", type=" + type + "]";
+	}
+	
+	
 }

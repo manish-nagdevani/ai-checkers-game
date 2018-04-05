@@ -1,4 +1,4 @@
-package com.ai.game;
+package com.game.checkers.components;
 
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
@@ -31,6 +31,7 @@ public class Square extends Button {
 			iv.setFitHeight(30);
 			iv.setFitWidth(35);
 			this.setGraphic(iv);
+			this.checkerPiece.setBelongsTo(this);
 		} else {
 			this.setGraphic( new ImageView() );
 		}
@@ -54,6 +55,7 @@ public class Square extends Button {
 	
 	public CheckerPiece releasePiece()
     {
+		this.checkerPiece.setBelongsTo(null);
         CheckerPiece tmpPiece = this.checkerPiece;
         setCheckerPiece(null);
         return tmpPiece;
@@ -68,4 +70,11 @@ public class Square extends Button {
 	public boolean isToLeft(Square dest) {
 		return (this.getY() < dest.getY());
 	}
+
+	@Override
+	public String toString() {
+		return "Square [x=" + x + ", y=" + y + ", checkerPiece=" + checkerPiece + ", color=" + color + "]";
+	}
+	
+	
 }
