@@ -101,7 +101,8 @@ public class CheckerBoard extends GridPane {
 					Player.performMove(decidedMove, this);
 					this.activeSquare.getStyleClass().removeAll("checker-square-active");
 					this.activeSquare = null;
-					GamePlay.getInstance().playCPU(this);
+					GamePlay.getInstance().switchActivePlayer();
+					//GamePlay.getInstance().playCPU(this);
 				} else {
 					System.out.println("Not a legal Move. Please try again");
 				}

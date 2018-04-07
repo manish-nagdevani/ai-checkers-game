@@ -1,20 +1,21 @@
 package com.game.checkers.components;
 
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 
 public class Square extends Button {
-	
-	private int x,y;
+
+	private int x, y;
 	private CheckerPiece checkerPiece;
 	private final Color color;
-	
+
 	public Square(int x, int y, final Color color) {
 		this.x = x;
 		this.y = y;
 		this.color = color;
 		this.getStyleClass().add("checker-square");
-		if(color == Color.WHITE)
+		if (color == Color.WHITE)
 			this.getStyleClass().add("checker-square-white");
 		else
 			this.getStyleClass().add("checker-square-black");
@@ -26,14 +27,19 @@ public class Square extends Button {
 
 	public void setCheckerPiece(CheckerPiece checkerPiece) {
 		this.checkerPiece = checkerPiece;
-		if(checkerPiece != null) {
-		ImageView iv = new ImageView(checkerPiece.getImage());
+		if (checkerPiece != null) {
+			ImageView iv = new ImageView(checkerPiece.getImage());
 			iv.setFitHeight(30);
 			iv.setFitWidth(35);
-			this.setGraphic(iv);
+			Platform.runLater(() -> {
+				this.setGraphic(iv);
+				
+			});
 			this.checkerPiece.setBelongsTo(this);
 		} else {
-			this.setGraphic( new ImageView() );
+			javafx.application.Platform.runLater(() -> {
+				this.setGraphic(new ImageView());
+			});
 		}
 	}
 
@@ -48,25 +54,24 @@ public class Square extends Button {
 	public Color getColor() {
 		return color;
 	}
-	
+
 	public boolean hasCheckerPiece() {
 		return (getCheckerPiece() != null);
 	}
-	
-	public CheckerPiece releasePiece()
-    {
+
+	public CheckerPiece releasePiece() {
 		this.checkerPiece.setBelongsTo(null);
-        CheckerPiece tmpPiece = this.checkerPiece;
-        setCheckerPiece(null);
-        return tmpPiece;
-    }
-	
-	//Returns true is src is to Right of dest
+		CheckerPiece tmpPiece = this.checkerPiece;
+		setCheckerPiece(null);
+		return tmpPiece;
+	}
+
+	// Returns true is src is to Right of dest
 	public boolean isToRight(Square dest) {
 		return (this.getY() > dest.getY());
 	}
-	
-	//Returns true is src is to Left of dest
+
+	// Returns true is src is to Left of dest
 	public boolean isToLeft(Square dest) {
 		return (this.getY() < dest.getY());
 	}
@@ -75,6 +80,5 @@ public class Square extends Button {
 	public String toString() {
 		return "Square [x=" + x + ", y=" + y + ", checkerPiece=" + checkerPiece + ", color=" + color + "]";
 	}
-	
-	
+
 }

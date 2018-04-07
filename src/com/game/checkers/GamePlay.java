@@ -1,6 +1,7 @@
 package com.game.checkers;
 
 import java.util.Scanner;
+import java.util.Set;
 
 import com.game.checkers.components.CheckerBoard;
 import com.game.checkers.components.Color;
@@ -14,14 +15,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class GamePlay {
-	
+
 	private Player cpu = null;
 	private Player activePlayer = null;
 	private CheckerBoard board = null;
 	private Player user = null;
-	
+
 	private static GamePlay gamePlay = null;
-	
+
 	private GamePlay() {
 	}
 
@@ -40,7 +41,7 @@ public class GamePlay {
 			String playFirst = sc.nextLine();
 
 			sc.close();
-			
+
 			initializeBoard(board, user, cpu);
 
 			// Display Board
@@ -49,29 +50,79 @@ public class GamePlay {
 			if (playFirst.equalsIgnoreCase("y")) {
 				activePlayer = user;
 			} else {
-				playCPU(board);
+				activePlayer = cpu;
 			}
 			
 			
+			CpuTurn cpuTurn = new CpuTurn();
+			Thread t = new Thread(cpuTurn);
+			t.start();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void playCPU(CheckerBoard board) {
-		activePlayer = cpu;
-		board.setDisable(true);
-		Move move = ((CPU) cpu).getNextMove(board);
-		if (move == null) {
-			// Game Over Logic
-			System.out.println("Game Terminated");
-		} else {
-			// Make move
-			CPU.performMove(move, board);
-		}
-		activePlayer = user;
-		board.setDisable(false);
+		new Thread() {
+			
+			@Override
+			public void run() {
+				super.run();
+				boolean gameOver = false;
+				while (!gameOver) {
+
+					// CPU's Turn
+					if (activePlayer == cpu) {
+						board.setDisable(true);
+						Set<Move> allPossibleMoves = ((CPU) cpu).getNextMove(board);
+						if (!GameCommonUtils.hasMoreMoves(allPossibleMoves)) {
+							// Game Over
+							System.out.println("Game Over");
+							gameOver = true;
+							continue;
+						}
+
+						Move move = ((CPU) cpu).calculateBestMove(allPossibleMoves);
+						if (move == null) {
+							// Game Over
+							System.out.println("Game Terminated");
+							gameOver = true;
+							continue;
+						} else {
+							// Make move
+							CPU.performMove(move, board);
+						}
+
+						if (GameCommonUtils.hasMoreMoves(user, board)) {
+							switchActivePlayer();
+							board.setDisable(false);
+						} else {
+							// Game Over
+							System.out.println("Game Terminated");
+							gameOver = true;
+							continue;
+						}
+					}
+					// User's Turn
+					else {
+						while (isPlaying(user)) {
+							try {
+								System.out.println("User playing.. Let's sleep for 2 sec: Thread: "+this.getName());
+								Thread.sleep(2000);
+								
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			}
+		}.start();
+	}
+
+	private boolean isPlaying(final Player player) {
+		return activePlayer == player;
 	}
 
 	private void initializeBoard(CheckerBoard board, Player user, Player cpu) {
@@ -97,12 +148,79 @@ public class GamePlay {
 		return activePlayer;
 	}
 	
-	
+	public void switchActivePlayer() {
+		if(activePlayer instanceof CPU)
+			this.activePlayer = user;
+		else
+			this.activePlayer = cpu;
+	}
+
 	public static GamePlay getInstance() {
-		if(gamePlay == null) {
+		if (gamePlay == null) {
 			gamePlay = new GamePlay();
 		}
 		return gamePlay;
+
+	}
+	
+	
+	class CpuTurn implements Runnable{
+
+		@Override
+		public void run() {			
+			boolean gameOver = false;
+			while (!gameOver) {
+
+				// CPU's Turn
+				if (activePlayer == cpu) {
+					board.setDisable(true);
+					Set<Move> allPossibleMoves = ((CPU) cpu).getNextMove(board);
+					if (!GameCommonUtils.hasMoreMoves(allPossibleMoves)) {
+						// Game Over
+						System.out.println("Game Over");
+						gameOver = true;
+						continue;
+					}
+
+					Move move = ((CPU) cpu).calculateBestMove(allPossibleMoves);
+					if (move == null) {
+						// Game Over
+						System.out.println("Game Terminated");
+						gameOver = true;
+						continue;
+					} else {
+						// Make move
+						CPU.performMove(move, board);
+					}
+
+					if (GameCommonUtils.hasMoreMoves(user, board)) {
+						switchActivePlayer();
+						board.setDisable(false);
+					} else {
+						// Game Over
+						System.out.println("Game Terminated");
+						gameOver = true;
+						continue;
+					}
+				}
+				// User's Turn
+				else {
+					while (isPlaying(user)) {
+						try {
+							System.out.println("User playing.. Let's sleep for 2 sec");
+							Thread.sleep(2000);
+							
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
 			
+		}
+		
 	}
 }
+
+
+

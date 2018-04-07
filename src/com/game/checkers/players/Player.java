@@ -17,11 +17,17 @@ public abstract class Player {
 	protected Set<CheckerPiece> pieces;
 	
 	protected abstract void makeMove(CheckerBoard board);
-	protected abstract boolean hasWon();
 	
 	
 	//Given a Move, this function actually performs it
 	public static void performMove(Move move, CheckerBoard board) {
+		if(GamePlay.getInstance().getActivePlayer() instanceof CPU) {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		Square srcSq = move.getSrc();
 		Square destSq = move.getDest();
 		if(srcSq != null && destSq != null) {

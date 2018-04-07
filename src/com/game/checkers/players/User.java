@@ -22,13 +22,6 @@ public class User extends Player{
 		// TODO Auto-generated method stub
 		
 	}
-
-
-	@Override
-	protected boolean hasWon() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 	
 	
 	public static Player getInstance(String name, Color color) {

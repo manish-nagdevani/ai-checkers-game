@@ -27,14 +27,8 @@ public class CPU extends Player {
 	protected void makeMove(CheckerBoard board) {
 
 	}
-
-	@Override
-	protected boolean hasWon() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 	
-	public Move getNextMove(CheckerBoard board) {
+	public Set<Move> getNextMove(CheckerBoard board) {
 		Set<CheckerPiece> pieces = this.getPieces();
 		Set<Move> allPossibleMoves = new HashSet<Move>();
 		for(CheckerPiece piece : pieces) {
@@ -44,11 +38,10 @@ public class CPU extends Player {
 				allPossibleMoves.add(m);
 			}
 		}
-		Move bestMove = calculateBestMove(allPossibleMoves);
-		return bestMove;
+		return allPossibleMoves;
 	}
 
-	private Move calculateBestMove(Set<Move> allPossibleMoves) {
+	public Move calculateBestMove(Set<Move> allPossibleMoves) {
 		Random rand = new Random();
 		int needle = rand.nextInt(allPossibleMoves.size());
 		int i = 0;
