@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.game.checkers.components.CheckerBoard;
 import com.game.checkers.components.Color;
+import com.game.checkers.eval.BoardSummary;
 import com.game.checkers.moves.Move;
 import com.game.checkers.players.CPU;
 import com.game.checkers.players.Player;
@@ -35,7 +36,7 @@ public class GamePlay {
 			String name = sc.nextLine();
 
 			user = User.getInstance(name, Color.BLACK);
-			cpu = CPU.getInstance(name, Color.WHITE);
+			cpu = CPU.getInstance("cpu", Color.WHITE);
 
 			System.out.println("Do you want to play first? (y/n)");
 			String playFirst = sc.nextLine();
@@ -63,63 +64,75 @@ public class GamePlay {
 		}
 	}
 
-	public void playCPU(CheckerBoard board) {
-		new Thread() {
-			
-			@Override
-			public void run() {
-				super.run();
-				boolean gameOver = false;
-				while (!gameOver) {
-
-					// CPU's Turn
-					if (activePlayer == cpu) {
-						board.setDisable(true);
-						Set<Move> allPossibleMoves = ((CPU) cpu).getNextMove(board);
-						if (!GameCommonUtils.hasMoreMoves(allPossibleMoves)) {
-							// Game Over
-							System.out.println("Game Over");
-							gameOver = true;
-							continue;
-						}
-
-						Move move = ((CPU) cpu).calculateBestMove(allPossibleMoves);
-						if (move == null) {
-							// Game Over
-							System.out.println("Game Terminated");
-							gameOver = true;
-							continue;
-						} else {
-							// Make move
-							CPU.performMove(move, board);
-						}
-
-						if (GameCommonUtils.hasMoreMoves(user, board)) {
-							switchActivePlayer();
-							board.setDisable(false);
-						} else {
-							// Game Over
-							System.out.println("Game Terminated");
-							gameOver = true;
-							continue;
-						}
-					}
-					// User's Turn
-					else {
-						while (isPlaying(user)) {
-							try {
-								System.out.println("User playing.. Let's sleep for 2 sec: Thread: "+this.getName());
-								Thread.sleep(2000);
-								
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-						}
-					}
-				}
-			}
-		}.start();
-	}
+//	public void playCPU(CheckerBoard board) {
+//		new Thread() {
+//			
+//			@Override
+//			public void run() {
+//				super.run();
+//				boolean gameOver = false;
+//				while (!gameOver) {
+//
+//					// CPU's Turn
+//					if (activePlayer == cpu) {
+//						board.setDisable(true);
+//						Set<Move> allPossibleMoves = ((CPU) cpu).getNextMove(board);
+//						if (!GameCommonUtils.hasMoreMoves(allPossibleMoves)) {
+//							// Game Over
+//							System.out.println("Game Over");
+//							gameOver = true;
+//							continue;
+//						}
+//
+//						Move move = ((CPU) cpu).calculateBestMove(allPossibleMoves);
+//						if (move == null) {
+//							// Game Over
+//							System.out.println("Game Over");
+//							gameOver = true;
+//							continue;
+//						} else {
+//							// Make move
+//							CPU.performMove(move, board);
+//						}
+//
+//						if (GameCommonUtils.hasMoreMoves(user, board)) {
+//							switchActivePlayer();
+//							board.setDisable(false);
+//						} else {
+//							// Game Over
+//							System.out.println("Game Over");
+//							gameOver = true;
+//							continue;
+//						}
+//					}
+//					// User's Turn
+//					else {
+//						while (isPlaying(user)) {
+//							try {
+//								System.out.println("User playing.. Let's sleep for 2 sec: Thread: "+this.getName());
+//								Thread.sleep(2000);
+//								
+//							} catch (InterruptedException e) {
+//								e.printStackTrace();
+//							}
+//						}
+//					}
+//				}
+//				BoardSummary bs = new BoardSummary();
+//				bs.setCpuPieceCount(cpu.getPieceCount());
+//				bs.setCpuPieceCount(user.getPieceCount());
+//				System.out.println(bs);
+//				
+//				if(GameCommonUtils.hasWon(user)) {
+//					System.out.println("User Won");
+//				} else if(GameCommonUtils.hasWon(user)) {
+//					System.out.println("CPU Won");
+//				} else {
+//					System.out.println("Game Draw");
+//				}
+//			}
+//		}.start();
+//	}
 
 	private boolean isPlaying(final Player player) {
 		return activePlayer == player;
@@ -207,14 +220,26 @@ public class GamePlay {
 				else {
 					while (isPlaying(user)) {
 						try {
-							System.out.println("User playing.. Let's sleep for 2 sec");
-							Thread.sleep(2000);
+							Thread.sleep(1);
 							
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 					}
 				}
+			}
+			
+			BoardSummary bs = new BoardSummary();
+			bs.setCpuPieceCount(cpu.getPieceCount());
+			bs.setUserPieceCount(user.getPieceCount());
+			System.out.println(bs);
+			
+			if(GameCommonUtils.hasWon(user)) {
+				System.out.println("User Won");
+			} else if(GameCommonUtils.hasWon(cpu)) {
+				System.out.println("CPU Won");
+			} else {
+				System.out.println("Game Draw");
 			}
 			
 		}

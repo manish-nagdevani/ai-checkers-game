@@ -13,11 +13,6 @@ import com.game.checkers.players.User;
 
 public class GameCommonUtils {
 	
-	public static int getPieceCountForPlayer(Player p) {
-		Set<CheckerPiece> pieces = p.getPieces();
-		return (pieces == null) ? 0 : p.getPieces().size();
-	}
-	
 	public static boolean hasMoreMoves(Player p, CheckerBoard board) {
 		Set<Move> allLegalMoves = new HashSet<Move>();
 		for(CheckerPiece piece : p.getPieces()) {
@@ -40,7 +35,7 @@ public class GameCommonUtils {
 			opponent = User.getInstance();
 		}
 		
-		return (opponent.getPieces().size() == 0 && p.getPieces().size() > 0);
+		return (p.getPieceCount() > opponent.getPieceCount());
 	}
 	
 	public static boolean isWithinLimits(int x, int y, int size) {

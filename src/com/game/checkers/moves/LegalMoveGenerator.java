@@ -1,6 +1,7 @@
 package com.game.checkers.moves;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.game.checkers.components.CheckerBoard;
@@ -27,19 +28,21 @@ public class LegalMoveGenerator {
 		Square dest = null;
 		dest = board.getSquare(src.getX() + direction, src.getY() - 1);
 		if(dest != null) {
-			if(!dest.hasCheckerPiece() || (dest.getCheckerPiece().getColor() != src.getCheckerPiece().getColor())) {
-				System.out.println("I was left");
-				Move diagLeft = new Move(src, dest, MoveType.REGULAR);
+			Move diagLeft = new Move(src, dest, MoveType.REGULAR);
+			if(!dest.hasCheckerPiece()) {
+				normalMoves.put(dest, diagLeft);
+			} else if(dest.getCheckerPiece().getColor() != src.getCheckerPiece().getColor()) {
 				normalMoves.put(dest, diagLeft);
 			}
 		}
 		
 		dest = board.getSquare(src.getX() + direction, src.getY() + 1);
 		if(dest != null) {
-			if(!dest.hasCheckerPiece() || (dest.getCheckerPiece().getColor() != src.getCheckerPiece().getColor())) {
-				System.out.println("I was right");
-				Move diagLeft = new Move(src, dest, MoveType.REGULAR);
-				normalMoves.put(dest, diagLeft);
+			Move diagRight = new Move(src, dest, MoveType.REGULAR);
+			if(!dest.hasCheckerPiece()) {				
+				normalMoves.put(dest, diagRight);
+			} else if(dest.getCheckerPiece().getColor() != src.getCheckerPiece().getColor()) {
+				normalMoves.put(dest, diagRight);
 			}
 		}
 
@@ -47,14 +50,16 @@ public class LegalMoveGenerator {
 	}
 
 	private static Map<Square, Move> generateJumpMove(Square src, CheckerBoard board,
-			final Map<Square, Move> normalMoves) {
+			 Map<Square, Move> normalMoves) {
 		Map<Square, Move> jumpMoves = new HashMap<Square, Move>();
 		int direction = 2; // Moving down on the board
 		if (src.getCheckerPiece().getColor() == Color.BLACK)
 			direction = -2; // Moving Up on the board
-
-		for (Move m : normalMoves.values()) {
+		Iterator<Move> itr = normalMoves.values().iterator();  
+		while(itr.hasNext()) {
+			Move m = itr.next();
 			if (m.getDest().hasCheckerPiece()) {
+				itr.remove();
 				if (src.isToRight(m.getDest())) {
 					Square dest = board.getSquare(src.getX() + direction, src.getY() - 2);
 					if (dest != null && !dest.hasCheckerPiece()) {

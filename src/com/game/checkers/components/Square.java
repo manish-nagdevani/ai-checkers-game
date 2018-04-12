@@ -31,11 +31,11 @@ public class Square extends Button {
 			ImageView iv = new ImageView(checkerPiece.getImage());
 			iv.setFitHeight(30);
 			iv.setFitWidth(35);
+			this.checkerPiece.setBelongsTo(this);
 			Platform.runLater(() -> {
 				this.setGraphic(iv);
 				
 			});
-			this.checkerPiece.setBelongsTo(this);
 		} else {
 			javafx.application.Platform.runLater(() -> {
 				this.setGraphic(new ImageView());
@@ -60,7 +60,7 @@ public class Square extends Button {
 	}
 
 	public CheckerPiece releasePiece() {
-		this.checkerPiece.setBelongsTo(null);
+		//this.checkerPiece.setBelongsTo(null);
 		CheckerPiece tmpPiece = this.checkerPiece;
 		setCheckerPiece(null);
 		return tmpPiece;

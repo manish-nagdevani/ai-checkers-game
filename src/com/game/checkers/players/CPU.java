@@ -1,6 +1,7 @@
 package com.game.checkers.players;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -11,6 +12,7 @@ import com.game.checkers.components.Color;
 import com.game.checkers.components.Square;
 import com.game.checkers.moves.LegalMoveGenerator;
 import com.game.checkers.moves.Move;
+import com.game.checkers.moves.Move.MoveType;
 
 public class CPU extends Player {
 	//private MoveGenerator moveGen = new MoveGenerator();
@@ -42,6 +44,19 @@ public class CPU extends Player {
 	}
 
 	public Move calculateBestMove(Set<Move> allPossibleMoves) {
+		Set<Move> availJumpMoves = new HashSet<Move>();
+		Iterator<Move> itr = allPossibleMoves.iterator();
+		while(itr.hasNext()) {
+			Move m = itr.next();
+			if(m.getType() == MoveType.JUMP) {
+				availJumpMoves.add(m);
+				itr.remove();
+			}
+		}
+		if(!availJumpMoves.isEmpty()) {
+			allPossibleMoves = availJumpMoves;
+		}
+		
 		Random rand = new Random();
 		int needle = rand.nextInt(allPossibleMoves.size());
 		int i = 0;
