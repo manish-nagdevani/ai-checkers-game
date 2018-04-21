@@ -17,6 +17,13 @@ public class CheckerPiece {
 		this.image = new Image(filePath);
 	}
 	
+	public CheckerPiece(CheckerPiece checkerPiece) {
+		this.hasMoved = checkerPiece.isHasMoved();
+		this.color = checkerPiece.getColor();
+		this.image = null;
+		this.belongsTo = null;
+	}
+
 	public boolean isHasMoved() {
 		return hasMoved;
 	}
@@ -41,7 +48,7 @@ public class CheckerPiece {
 
 	@Override
 	public String toString() {
-		return "CheckerPiece [color=" + color + "]";
+		return "CheckerPiece @ " + this.hashCode() +" [color=" + color + " Belongs To: "+belongsTo.hashCode()+"]";
 	}
 	
 	

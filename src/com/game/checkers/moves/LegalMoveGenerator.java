@@ -13,7 +13,7 @@ public class LegalMoveGenerator {
 
 	public static Map<Square, Move> generateLegalMoves(Square srcSquare, final CheckerBoard board) {
 		Map<Square, Move> normalMoves = generateNormalMove(srcSquare, board);
-		Map<Square, Move> jumpMoves = generateJumpMove(srcSquare, board, normalMoves);
+		Map<Square, Move> jumpMoves = generateJumpMove(srcSquare, board, normalMoves);		
 		
 		return jumpMoves.isEmpty() ? normalMoves : jumpMoves;
 	}
@@ -36,6 +36,7 @@ public class LegalMoveGenerator {
 			}
 		}
 		
+		dest = null;
 		dest = board.getSquare(src.getX() + direction, src.getY() + 1);
 		if(dest != null) {
 			Move diagRight = new Move(src, dest, MoveType.REGULAR);
@@ -55,6 +56,7 @@ public class LegalMoveGenerator {
 		int direction = 2; // Moving down on the board
 		if (src.getCheckerPiece().getColor() == Color.BLACK)
 			direction = -2; // Moving Up on the board
+		
 		Iterator<Move> itr = normalMoves.values().iterator();  
 		while(itr.hasNext()) {
 			Move m = itr.next();

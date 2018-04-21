@@ -3,8 +3,9 @@ package com.game.checkers;
 import java.util.Scanner;
 import java.util.Set;
 
+import com.game.checkers.ai.State;
 import com.game.checkers.components.CheckerBoard;
-import com.game.checkers.components.Color;
+import com.game.checkers.components.Square;
 import com.game.checkers.eval.BoardSummary;
 import com.game.checkers.moves.Move;
 import com.game.checkers.players.CPU;
@@ -29,14 +30,11 @@ public class GamePlay {
 
 	public void init(Stage primaryStage) {
 		try {
-			board = CheckerBoard.getInstance(6);
+			board = new CheckerBoard(6);
 			Scanner sc = new Scanner(System.in);
 
-			System.out.println("Enter Your Name: ");
-			String name = sc.nextLine();
-
-			user = User.getInstance(name, Color.BLACK);
-			cpu = CPU.getInstance("cpu", Color.WHITE);
+			user = User.getInstance();
+			cpu = CPU.getInstance();
 
 			System.out.println("Do you want to play first? (y/n)");
 			String playFirst = sc.nextLine();
@@ -47,14 +45,13 @@ public class GamePlay {
 
 			// Display Board
 			displayBoard(primaryStage, board);
-			
+
 			if (playFirst.equalsIgnoreCase("y")) {
 				activePlayer = user;
 			} else {
 				activePlayer = cpu;
 			}
-			
-			
+
 			CpuTurn cpuTurn = new CpuTurn();
 			Thread t = new Thread(cpuTurn);
 			t.start();
@@ -64,76 +61,6 @@ public class GamePlay {
 		}
 	}
 
-//	public void playCPU(CheckerBoard board) {
-//		new Thread() {
-//			
-//			@Override
-//			public void run() {
-//				super.run();
-//				boolean gameOver = false;
-//				while (!gameOver) {
-//
-//					// CPU's Turn
-//					if (activePlayer == cpu) {
-//						board.setDisable(true);
-//						Set<Move> allPossibleMoves = ((CPU) cpu).getNextMove(board);
-//						if (!GameCommonUtils.hasMoreMoves(allPossibleMoves)) {
-//							// Game Over
-//							System.out.println("Game Over");
-//							gameOver = true;
-//							continue;
-//						}
-//
-//						Move move = ((CPU) cpu).calculateBestMove(allPossibleMoves);
-//						if (move == null) {
-//							// Game Over
-//							System.out.println("Game Over");
-//							gameOver = true;
-//							continue;
-//						} else {
-//							// Make move
-//							CPU.performMove(move, board);
-//						}
-//
-//						if (GameCommonUtils.hasMoreMoves(user, board)) {
-//							switchActivePlayer();
-//							board.setDisable(false);
-//						} else {
-//							// Game Over
-//							System.out.println("Game Over");
-//							gameOver = true;
-//							continue;
-//						}
-//					}
-//					// User's Turn
-//					else {
-//						while (isPlaying(user)) {
-//							try {
-//								System.out.println("User playing.. Let's sleep for 2 sec: Thread: "+this.getName());
-//								Thread.sleep(2000);
-//								
-//							} catch (InterruptedException e) {
-//								e.printStackTrace();
-//							}
-//						}
-//					}
-//				}
-//				BoardSummary bs = new BoardSummary();
-//				bs.setCpuPieceCount(cpu.getPieceCount());
-//				bs.setCpuPieceCount(user.getPieceCount());
-//				System.out.println(bs);
-//				
-//				if(GameCommonUtils.hasWon(user)) {
-//					System.out.println("User Won");
-//				} else if(GameCommonUtils.hasWon(user)) {
-//					System.out.println("CPU Won");
-//				} else {
-//					System.out.println("Game Draw");
-//				}
-//			}
-//		}.start();
-//	}
-
 	private boolean isPlaying(final Player player) {
 		return activePlayer == player;
 	}
@@ -141,9 +68,7 @@ public class GamePlay {
 	private void initializeBoard(CheckerBoard board, Player user, Player cpu) {
 		// Initialize Board
 		board.init();
-		board.placeInitialPieces(user, cpu);
-		System.out.println(user.getPieces().size());
-		System.out.println(cpu.getPieces().size());
+		board.placeInitialPieces();
 		board.show();
 	}
 
@@ -155,14 +80,16 @@ public class GamePlay {
 		scene.getStylesheets().add("styles/application.css");
 		root.setCenter(board);
 		primaryStage.show();
+		System.out.println(board.getParent());
+		System.out.println("Board's Parent Hashcode = " + board.getParent().hashCode());
 	}
 
 	public Player getActivePlayer() {
 		return activePlayer;
 	}
-	
+
 	public void switchActivePlayer() {
-		if(activePlayer instanceof CPU)
+		if (activePlayer instanceof CPU)
 			this.activePlayer = user;
 		else
 			this.activePlayer = cpu;
@@ -175,34 +102,48 @@ public class GamePlay {
 		return gamePlay;
 
 	}
-	
-	
-	class CpuTurn implements Runnable{
 
+	class CpuTurn implements Runnable {
 		@Override
-		public void run() {			
+		public void run() {
 			boolean gameOver = false;
 			while (!gameOver) {
 
 				// CPU's Turn
 				if (activePlayer == cpu) {
 					board.setDisable(true);
+
+					// Either Normal moves or Jump Moves
 					Set<Move> allPossibleMoves = ((CPU) cpu).getNextMove(board);
-					if (!GameCommonUtils.hasMoreMoves(allPossibleMoves)) {
-						// Game Over
+
+					// Selecting the Move to take if any
+					Move move = null;
+
+					// Game Over
+					if (allPossibleMoves.size() == 0) {
 						System.out.println("Game Over");
+						gameOver = true;
+						continue;
+					} else if (allPossibleMoves.size() == 1) {
+						move = allPossibleMoves.iterator().next();
+					} else {
+						Move bestMove = ((CPU) cpu).calculateBestMove(allPossibleMoves, board);
+						if (bestMove != null) {
+							Square srcSq = board.getSquare(bestMove.getSrc().getX(), bestMove.getSrc().getY());
+							Square destSq = board.getSquare(bestMove.getDest().getX(), bestMove.getDest().getY());
+							move = new Move(srcSq, destSq, bestMove.getType());
+						}
+					}
+
+					// Game Over
+					if (move == null) {
+						System.out.println("Game Terminated");
 						gameOver = true;
 						continue;
 					}
 
-					Move move = ((CPU) cpu).calculateBestMove(allPossibleMoves);
-					if (move == null) {
-						// Game Over
-						System.out.println("Game Terminated");
-						gameOver = true;
-						continue;
-					} else {
-						// Make move
+					// Make move
+					else {
 						CPU.performMove(move, board);
 					}
 
@@ -221,31 +162,33 @@ public class GamePlay {
 					while (isPlaying(user)) {
 						try {
 							Thread.sleep(1);
-							
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 					}
 				}
 			}
-			
+
 			BoardSummary bs = new BoardSummary();
-			bs.setCpuPieceCount(cpu.getPieceCount());
-			bs.setUserPieceCount(user.getPieceCount());
+			bs.setCpuPieceCount(board.getPieceCount(cpu.getColor()));
+			bs.setUserPieceCount(board.getPieceCount(user.getColor()));
 			System.out.println(bs);
-			
-			if(GameCommonUtils.hasWon(user)) {
+
+			State state = new State(board);
+			System.out.println("State Board Hashcode = " + state.getBoard().hashCode());
+			System.out.println("Actual Board Hashcode = " + board.hashCode());
+			System.out.println("State Board Squares array Hashcode = " + state.getBoard().getSquares().hashCode());
+			System.out.println("Actual Board Squares array Hashcode = " + board.getSquares().hashCode());
+
+			if (GameCommonUtils.hasWon(user, board)) {
 				System.out.println("User Won");
-			} else if(GameCommonUtils.hasWon(cpu)) {
+			} else if (GameCommonUtils.hasWon(cpu, board)) {
 				System.out.println("CPU Won");
 			} else {
 				System.out.println("Game Draw");
 			}
-			
+
 		}
-		
+
 	}
 }
-
-
-
