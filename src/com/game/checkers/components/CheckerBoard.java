@@ -92,25 +92,34 @@ public class CheckerBoard extends GridPane {
 
 	private void onSquareClickEvent(int xVal, int yVal) {
 		Square clickedSquare = this.squares[xVal][yVal];
+		if (clickedSquare.hasCheckerPiece()) {
+			if (clickedSquare.getCheckerPiece().getColor() == Color.WHITE) {
+				System.out.println("That's not your Piece");
+				return;
+			}
+		}
 
 		// 1st click capture
-		if (activeSquare == null && clickedSquare.hasCheckerPiece()) {
-			activeSquare = clickedSquare;
-			setActiveSquare(clickedSquare);
-			legalMoves = LegalMoveGenerator.generateLegalMoves(activeSquare, this);
-			for (Move m : legalMoves.values()) {
-				if (!m.getDest().hasCheckerPiece()) {
-					this.getSquare(m.getDest().getX(), m.getDest().getY()).getStyleClass()
-							.removeAll("checker-square-legal-suggestion");
-					this.getSquare(m.getDest().getX(), m.getDest().getY()).getStyleClass()
-							.add("checker-square-legal-suggestion");
-					System.out.println(
-							m.getType().toString() + "(" + m.getDest().getX() + ", " + m.getDest().getY() + ")");
-				} else {
-					legalMoves.remove(m);
+		if (activeSquare == null) {
+			if (clickedSquare.hasCheckerPiece()) {
+				activeSquare = clickedSquare;
+				setActiveSquare(clickedSquare);
+				legalMoves = LegalMoveGenerator.generateLegalMoves(activeSquare, this);
+				for (Move m : legalMoves.values()) {
+					if (!m.getDest().hasCheckerPiece()) {
+						this.getSquare(m.getDest().getX(), m.getDest().getY()).getStyleClass()
+								.removeAll("checker-square-legal-suggestion");
+						this.getSquare(m.getDest().getX(), m.getDest().getY()).getStyleClass()
+								.add("checker-square-legal-suggestion");
+						System.out.println(
+								m.getType().toString() + "(" + m.getDest().getX() + ", " + m.getDest().getY() + ")");
+					} else {
+						legalMoves.remove(m);
+					}
 				}
+			} else {
+				System.out.println("No Piece on this cell");
 			}
-
 		} else {
 			if (!clickedSquare.hasCheckerPiece()) {
 				if (this.legalMoves.keySet().contains(clickedSquare)) {
@@ -119,7 +128,6 @@ public class CheckerBoard extends GridPane {
 					this.activeSquare.getStyleClass().removeAll("checker-square-active");
 					this.activeSquare = null;
 					GamePlay.getInstance().switchActivePlayer();
-					// GamePlay.getInstance().playCPU(this);
 				} else {
 					System.out.println("Not a legal Move. Please try again");
 				}
@@ -132,6 +140,50 @@ public class CheckerBoard extends GridPane {
 						.removeAll("checker-square-legal-suggestion");
 			}
 		}
+		// if (activeSquare == null && clickedSquare.hasCheckerPiece()) {
+		// activeSquare = clickedSquare;
+		// setActiveSquare(clickedSquare);
+		// legalMoves = LegalMoveGenerator.generateLegalMoves(activeSquare,
+		// this);
+		// for (Move m : legalMoves.values()) {
+		// if (!m.getDest().hasCheckerPiece()) {
+		// this.getSquare(m.getDest().getX(),
+		// m.getDest().getY()).getStyleClass()
+		// .removeAll("checker-square-legal-suggestion");
+		// this.getSquare(m.getDest().getX(),
+		// m.getDest().getY()).getStyleClass()
+		// .add("checker-square-legal-suggestion");
+		// System.out.println(
+		// m.getType().toString() + "(" + m.getDest().getX() + ", " +
+		// m.getDest().getY() + ")");
+		// } else {
+		// legalMoves.remove(m);
+		// }
+		// }
+		//
+		// } else {
+		// if (!clickedSquare.hasCheckerPiece()) {
+		// if (this.legalMoves.keySet().contains(clickedSquare)) {
+		// Move decidedMove = this.legalMoves.get(clickedSquare);
+		// Player.performMove(decidedMove, this);
+		// this.activeSquare.getStyleClass().removeAll("checker-square-active");
+		// this.activeSquare = null;
+		// GamePlay.getInstance().switchActivePlayer();
+		// // GamePlay.getInstance().playCPU(this);
+		// } else {
+		// System.out.println("Not a legal Move. Please try again");
+		// }
+		// } else if (clickedSquare.getCheckerPiece().getColor() ==
+		// activeSquare.getCheckerPiece().getColor()) {
+		// this.activeSquare.getStyleClass().removeAll("checker-square-active");
+		// this.activeSquare = null;
+		// }
+		// for (Move m : legalMoves.values()) {
+		// this.getSquare(m.getDest().getX(),
+		// m.getDest().getY()).getStyleClass()
+		// .removeAll("checker-square-legal-suggestion");
+		// }
+		// }
 	}
 
 	public void setActiveSquare(Square s) {
@@ -163,9 +215,6 @@ public class CheckerBoard extends GridPane {
 		}
 		System.out.println("----------------------------------------");
 	}
-
-
-
 
 	public Square[][] getSquares() {
 		return squares;

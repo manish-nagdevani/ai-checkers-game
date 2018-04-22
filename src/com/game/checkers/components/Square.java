@@ -43,7 +43,6 @@ public class Square extends Button {
 			this.checkerPiece.setBelongsTo(this);
 			Platform.runLater(() -> {
 				this.setGraphic(iv);
-				
 			});
 		} else {
 			javafx.application.Platform.runLater(() -> {

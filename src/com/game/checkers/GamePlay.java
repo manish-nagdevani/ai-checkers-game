@@ -1,10 +1,15 @@
 package com.game.checkers;
 
-import java.util.Scanner;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.game.checkers.ai.DifficultyLevel;
 import com.game.checkers.ai.State;
 import com.game.checkers.components.CheckerBoard;
+import com.game.checkers.components.CheckerPiece;
 import com.game.checkers.components.Square;
 import com.game.checkers.eval.BoardSummary;
 import com.game.checkers.moves.Move;
@@ -12,7 +17,12 @@ import com.game.checkers.players.CPU;
 import com.game.checkers.players.Player;
 import com.game.checkers.players.User;
 
+import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -30,27 +40,18 @@ public class GamePlay {
 
 	public void init(Stage primaryStage) {
 		try {
+			String choice = promptDifficulty();
+			DifficultyLevel cpuLevel = DifficultyLevel.valueOf(choice);
+			
 			board = new CheckerBoard(6);
-			Scanner sc = new Scanner(System.in);
-
 			user = User.getInstance();
 			cpu = CPU.getInstance();
-
-			System.out.println("Do you want to play first? (y/n)");
-			String playFirst = sc.nextLine();
-
-			sc.close();
+			cpu.setLevel(cpuLevel);
+			promptUserToTakeTurn();
 
 			initializeBoard(board, user, cpu);
-
-			// Display Board
+			
 			displayBoard(primaryStage, board);
-
-			if (playFirst.equalsIgnoreCase("y")) {
-				activePlayer = user;
-			} else {
-				activePlayer = cpu;
-			}
 
 			CpuTurn cpuTurn = new CpuTurn();
 			Thread t = new Thread(cpuTurn);
@@ -60,13 +61,48 @@ public class GamePlay {
 			e.printStackTrace();
 		}
 	}
+	
+	private String promptDifficulty() {
+		List<String> options = GameCommonUtils.getDificultyLevels();
+		ChoiceDialog<String> dialog = new ChoiceDialog<String>(options.get(0), options);
+		dialog.setTitle("Checkers Board Game");
+		dialog.setHeaderText("Choose Difficulty Level");
+		dialog.setContentText("Choose an option");
+		
+		Optional<String> result = dialog.showAndWait();
+		if(result.isPresent()) {
+			return result.get();
+		}
+		return null;
+	}
+
+	private void promptUserToTakeTurn() {
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Checkers Board Game");
+		alert.setHeaderText("Do you want to Play first?");
+		alert.setContentText("Choose an option");
+		
+		ButtonType yesButton = new ButtonType("Yes");
+		ButtonType noButton = new ButtonType("No");
+		ButtonType exitButton = new ButtonType("Exit");
+		alert.getButtonTypes().setAll(yesButton, noButton, exitButton);
+		
+		Optional<ButtonType> result = alert.showAndWait();
+		if(result.get() == yesButton) {
+			activePlayer = user;
+		} else if(result.get() == noButton) {
+			activePlayer = cpu;
+		} else {
+			System.exit(0);
+		}
+		
+	}
 
 	private boolean isPlaying(final Player player) {
 		return activePlayer == player;
 	}
 
 	private void initializeBoard(CheckerBoard board, Player user, Player cpu) {
-		// Initialize Board
 		board.init();
 		board.placeInitialPieces();
 		board.show();
@@ -102,6 +138,29 @@ public class GamePlay {
 		return gamePlay;
 
 	}
+	
+	private void outputWinner(Player player) {
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("Game Result");
+		if(player == null) {
+			alert.setHeaderText("Game Draw");
+		} else {
+			if(player instanceof User)
+				alert.setHeaderText("You Won");
+			else
+				alert.setHeaderText("Computer Won");
+		}
+		
+		ButtonType okButton = new ButtonType("OK");
+		
+		alert.getButtonTypes().setAll(okButton);
+		Optional<ButtonType> result = alert.showAndWait();
+		if(result.get() == okButton) {
+			System.exit(0);
+		} else {
+			System.exit(0);
+		}
+	}
 
 	class CpuTurn implements Runnable {
 		@Override
@@ -127,7 +186,7 @@ public class GamePlay {
 					} else if (allPossibleMoves.size() == 1) {
 						move = allPossibleMoves.iterator().next();
 					} else {
-						Move bestMove = ((CPU) cpu).calculateBestMove(allPossibleMoves, board);
+						Move bestMove = ((CPU) cpu).calculateBestMove(board);
 						if (bestMove != null) {
 							Square srcSq = board.getSquare(bestMove.getSrc().getX(), bestMove.getSrc().getY());
 							Square destSq = board.getSquare(bestMove.getDest().getX(), bestMove.getDest().getY());
@@ -148,6 +207,23 @@ public class GamePlay {
 					}
 
 					if (GameCommonUtils.hasMoreMoves(user, board)) {
+						Set<Move> allPossibleJumpMoves = GameCommonUtils.allJumpMovesPossible(board, user);
+						for(CheckerPiece piece : board.getPieces(user.getColor())) {
+							Square sq = piece.getBelongsTo();
+							if(sq.isDisable()) 
+								sq.setDisable(false);
+						}
+						if(!allPossibleJumpMoves.isEmpty()) {
+							Set<CheckerPiece> userPieces = board.getPieces(user.getColor());
+							Iterator<CheckerPiece> itr = userPieces.iterator();
+							Set<Square> jumpSrcSquares = allPossibleJumpMoves.stream().map(jumpMove -> jumpMove.getSrc()).collect(Collectors.toSet());
+							while(itr.hasNext()) {
+								Square src = itr.next().getBelongsTo();
+								if(!jumpSrcSquares.contains(src)) {
+									src.setDisable(true);
+								}
+							}
+						}
 						switchActivePlayer();
 						board.setDisable(false);
 					} else {
@@ -181,11 +257,17 @@ public class GamePlay {
 			System.out.println("Actual Board Squares array Hashcode = " + board.getSquares().hashCode());
 
 			if (GameCommonUtils.hasWon(user, board)) {
-				System.out.println("User Won");
+				Platform.runLater(() -> {
+					outputWinner(user);
+				});
 			} else if (GameCommonUtils.hasWon(cpu, board)) {
-				System.out.println("CPU Won");
+				Platform.runLater(() -> {
+					outputWinner(cpu);
+				});
 			} else {
-				System.out.println("Game Draw");
+				Platform.runLater(() -> {
+					outputWinner(null);
+				});
 			}
 
 		}

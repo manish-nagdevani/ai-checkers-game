@@ -51,14 +51,28 @@ public class CPU extends Player {
 		return jumpMoves.isEmpty() ? allRegularMoves : jumpMoves;
 	}
 
-	public Move calculateBestMove(Set<Move> allPossibleMoves, CheckerBoard board) {
+	public Move calculateBestMove(CheckerBoard board) {
 		return askAI(new State(board));
 	}
 
 	public Move askAI(State state) {
 		AI ai = new AI(state);
-		for(int i = 2; i < 15; i++)
-			ai.alphaBeta(state, i, -1000, 1000, true);
+		int maxDepth = 0;
+		switch(this.getLevel()) {
+		case BEGINNER:
+			maxDepth = 2;
+			break;
+		case INTERMEDIATE:
+			maxDepth = 8;
+			break;
+		case PRO:
+			maxDepth = 12;
+			break;
+		default :
+			maxDepth = 8;
+			break;
+		}
+		ai.alphaBeta(state, maxDepth, -1000, 1000, true);
 		return ai.bestMove;
 	}
 

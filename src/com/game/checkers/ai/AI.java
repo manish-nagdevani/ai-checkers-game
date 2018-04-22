@@ -14,22 +14,31 @@ import com.game.checkers.players.User;
 public class AI {
 	public Move bestMove;
 	public State root;
+	private final Player player = CPU.getInstance();
+	private final Player adversary = User.getInstance();
 	public AI(State root) {
 		this.root = root;
 	}
 
 	public int alphaBeta(State state, int depth, int alpha, int beta, boolean isMaxPlayer) {
-		if (depth == 0 || GameCommonUtils.isTerminalState(state)) {
+		if(depth == 0) {
+			System.out.println("Reached depth = 0");
+			int heuristicValue = GameCommonUtils.evaluation(state, player, adversary);
+			state.getBoard().show();
+			System.out.println(heuristicValue);
+			return heuristicValue;
+		}
+		if (GameCommonUtils.isTerminalState(state)) {
 			System.out.println("Terminal State found");
-			state.evaluateState();
-			return state.getUtilityValue();
+			int utilityValue = GameCommonUtils.evaluateTerminalState(state, player, adversary);
+			state.getBoard().show();
+			System.out.println(utilityValue);
+			return utilityValue;
 		}
 		if (isMaxPlayer) {
 			int v = Integer.MIN_VALUE;
 			List<State> childrenStates = generateAllStates(state, CPU.getInstance());
 			for(State child : childrenStates) {
-				System.out.println("CPU: ");
-				child.getBoard().show();
 				int temp = alphaBeta(child, depth - 1, alpha, beta, false);
 				if(v < temp) {
 					v = temp;
@@ -46,8 +55,6 @@ public class AI {
 			int v = Integer.MAX_VALUE;
 			List<State> childrenStates = generateAllStates(state, User.getInstance());
 			for(State child : childrenStates) {
-				System.out.println("User: ");
-				child.getBoard().show();
 				int temp = alphaBeta(child, depth - 1, alpha, beta, true);
 				v = Math.min(v, temp);
 				if(v > temp) {

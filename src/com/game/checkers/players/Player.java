@@ -1,6 +1,7 @@
 package com.game.checkers.players;
 
 import com.game.checkers.GamePlay;
+import com.game.checkers.ai.DifficultyLevel;
 import com.game.checkers.components.CheckerBoard;
 import com.game.checkers.components.CheckerPiece;
 import com.game.checkers.components.Color;
@@ -12,7 +13,7 @@ public abstract class Player {
 	protected String name;
 	protected Color color;
 	protected int score;
-	//protected Set<CheckerPiece> pieces;
+	private DifficultyLevel level = null;
 	
 	public String getName() {
 		return name;
@@ -94,5 +95,13 @@ public abstract class Player {
 	
 	public Color getColor() {
 		return color;
+	}
+	
+	public DifficultyLevel getLevel() {
+		return level;
+	}
+
+	public void setLevel(DifficultyLevel level) {
+		this.level = level;
 	}
 }
