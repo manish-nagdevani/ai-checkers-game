@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.game.checkers.GameCommonUtils;
 import com.game.checkers.ai.AI;
 import com.game.checkers.ai.State;
 import com.game.checkers.components.CheckerBoard;
@@ -47,7 +48,7 @@ public class CPU extends Player {
 				jumpMoves.add(m);
 			}
 		}
-		
+
 		return jumpMoves.isEmpty() ? allRegularMoves : jumpMoves;
 	}
 
@@ -58,22 +59,34 @@ public class CPU extends Player {
 	public Move askAI(State state) {
 		AI ai = new AI(state);
 		int maxDepth = 0;
-		switch(this.getLevel()) {
+		switch (this.getLevel()) {
 		case BEGINNER:
 			maxDepth = 2;
 			break;
 		case INTERMEDIATE:
-			maxDepth = 8;
+			maxDepth = 10;
 			break;
 		case PRO:
-			maxDepth = 12;
+			maxDepth = 12;			
 			break;
-		default :
+		default:
 			maxDepth = 8;
 			break;
-		}
+		}		
+		
 		ai.alphaBeta(state, maxDepth, -1000, 1000, true);
-		return ai.bestMove;
+		
+		GameCommonUtils.log("1. Cutoff = " + maxDepth);
+		GameCommonUtils.log("2. Total Number of Nodes Generated = " + AI.getNodesCreated());
+		GameCommonUtils.log("3. Number of Times Pruning occured in MAX function = " + AI.getNumberOfMaxPruning());
+		GameCommonUtils.log("4. Number of Times Pruning occured in MIN function = " + AI.getNumberOfMinPruning());
+		
+		ai.resetCounters();
+		
+		Move bestMove = ai.bestMove;
+		
+		ai.clean();
+		return bestMove;
 	}
 
 	public static Player getInstance() {

@@ -140,50 +140,6 @@ public class CheckerBoard extends GridPane {
 						.removeAll("checker-square-legal-suggestion");
 			}
 		}
-		// if (activeSquare == null && clickedSquare.hasCheckerPiece()) {
-		// activeSquare = clickedSquare;
-		// setActiveSquare(clickedSquare);
-		// legalMoves = LegalMoveGenerator.generateLegalMoves(activeSquare,
-		// this);
-		// for (Move m : legalMoves.values()) {
-		// if (!m.getDest().hasCheckerPiece()) {
-		// this.getSquare(m.getDest().getX(),
-		// m.getDest().getY()).getStyleClass()
-		// .removeAll("checker-square-legal-suggestion");
-		// this.getSquare(m.getDest().getX(),
-		// m.getDest().getY()).getStyleClass()
-		// .add("checker-square-legal-suggestion");
-		// System.out.println(
-		// m.getType().toString() + "(" + m.getDest().getX() + ", " +
-		// m.getDest().getY() + ")");
-		// } else {
-		// legalMoves.remove(m);
-		// }
-		// }
-		//
-		// } else {
-		// if (!clickedSquare.hasCheckerPiece()) {
-		// if (this.legalMoves.keySet().contains(clickedSquare)) {
-		// Move decidedMove = this.legalMoves.get(clickedSquare);
-		// Player.performMove(decidedMove, this);
-		// this.activeSquare.getStyleClass().removeAll("checker-square-active");
-		// this.activeSquare = null;
-		// GamePlay.getInstance().switchActivePlayer();
-		// // GamePlay.getInstance().playCPU(this);
-		// } else {
-		// System.out.println("Not a legal Move. Please try again");
-		// }
-		// } else if (clickedSquare.getCheckerPiece().getColor() ==
-		// activeSquare.getCheckerPiece().getColor()) {
-		// this.activeSquare.getStyleClass().removeAll("checker-square-active");
-		// this.activeSquare = null;
-		// }
-		// for (Move m : legalMoves.values()) {
-		// this.getSquare(m.getDest().getX(),
-		// m.getDest().getY()).getStyleClass()
-		// .removeAll("checker-square-legal-suggestion");
-		// }
-		// }
 	}
 
 	public void setActiveSquare(Square s) {

@@ -10,6 +10,7 @@ import com.game.checkers.ai.DifficultyLevel;
 import com.game.checkers.ai.State;
 import com.game.checkers.components.CheckerBoard;
 import com.game.checkers.components.CheckerPiece;
+import com.game.checkers.components.Color;
 import com.game.checkers.components.Square;
 import com.game.checkers.eval.BoardSummary;
 import com.game.checkers.moves.Move;
@@ -23,7 +24,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class GamePlay {
@@ -32,6 +35,7 @@ public class GamePlay {
 	private Player activePlayer = null;
 	private CheckerBoard board = null;
 	private Player user = null;
+	private TextArea loggingArea = null;
 
 	private static GamePlay gamePlay = null;
 
@@ -42,7 +46,7 @@ public class GamePlay {
 		try {
 			String choice = promptDifficulty();
 			DifficultyLevel cpuLevel = DifficultyLevel.valueOf(choice);
-			
+
 			board = new CheckerBoard(6);
 			user = User.getInstance();
 			cpu = CPU.getInstance();
@@ -50,7 +54,7 @@ public class GamePlay {
 			promptUserToTakeTurn();
 
 			initializeBoard(board, user, cpu);
-			
+
 			displayBoard(primaryStage, board);
 
 			CpuTurn cpuTurn = new CpuTurn();
@@ -61,16 +65,16 @@ public class GamePlay {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private String promptDifficulty() {
 		List<String> options = GameCommonUtils.getDificultyLevels();
 		ChoiceDialog<String> dialog = new ChoiceDialog<String>(options.get(0), options);
 		dialog.setTitle("Checkers Board Game");
 		dialog.setHeaderText("Choose Difficulty Level");
 		dialog.setContentText("Choose an option");
-		
+
 		Optional<String> result = dialog.showAndWait();
-		if(result.isPresent()) {
+		if (result.isPresent()) {
 			return result.get();
 		}
 		return null;
@@ -81,21 +85,21 @@ public class GamePlay {
 		alert.setTitle("Checkers Board Game");
 		alert.setHeaderText("Do you want to Play first?");
 		alert.setContentText("Choose an option");
-		
+
 		ButtonType yesButton = new ButtonType("Yes");
 		ButtonType noButton = new ButtonType("No");
 		ButtonType exitButton = new ButtonType("Exit");
 		alert.getButtonTypes().setAll(yesButton, noButton, exitButton);
-		
+
 		Optional<ButtonType> result = alert.showAndWait();
-		if(result.get() == yesButton) {
+		if (result.get() == yesButton) {
 			activePlayer = user;
-		} else if(result.get() == noButton) {
+		} else if (result.get() == noButton) {
 			activePlayer = cpu;
 		} else {
 			System.exit(0);
 		}
-		
+
 	}
 
 	private boolean isPlaying(final Player player) {
@@ -111,13 +115,22 @@ public class GamePlay {
 	private void displayBoard(Stage primaryStage, CheckerBoard board) {
 		primaryStage.setTitle("Checkers Game");
 		BorderPane root = new BorderPane();
-		Scene scene = new Scene(root, 400, 400);
+		Scene scene = new Scene(root, 900, 400);
 		primaryStage.setScene(scene);
 		scene.getStylesheets().add("styles/application.css");
 		root.setCenter(board);
+		VBox vbox = generateLoggerSpace();
+		root.setRight(vbox);
 		primaryStage.show();
-		System.out.println(board.getParent());
-		System.out.println("Board's Parent Hashcode = " + board.getParent().hashCode());
+	}
+
+	private VBox generateLoggerSpace() {
+		loggingArea = new TextArea();
+		loggingArea.setEditable(false);
+		loggingArea.getStyleClass().add("checker-logger-area");
+		VBox vbox = new VBox(20, loggingArea);
+		vbox.getStyleClass().add("vbox");
+		return vbox;
 	}
 
 	public Player getActivePlayer() {
@@ -138,28 +151,32 @@ public class GamePlay {
 		return gamePlay;
 
 	}
-	
+
 	private void outputWinner(Player player) {
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle("Game Result");
-		if(player == null) {
+		if (player == null) {
 			alert.setHeaderText("Game Draw");
 		} else {
-			if(player instanceof User)
+			if (player instanceof User)
 				alert.setHeaderText("You Won");
 			else
 				alert.setHeaderText("Computer Won");
 		}
-		
+
 		ButtonType okButton = new ButtonType("OK");
-		
+
 		alert.getButtonTypes().setAll(okButton);
 		Optional<ButtonType> result = alert.showAndWait();
-		if(result.get() == okButton) {
+		if (result.get() == okButton) {
 			System.exit(0);
 		} else {
 			System.exit(0);
 		}
+	}
+
+	public TextArea getLoggingArea() {
+		return loggingArea;
 	}
 
 	class CpuTurn implements Runnable {
@@ -208,29 +225,33 @@ public class GamePlay {
 
 					if (GameCommonUtils.hasMoreMoves(user, board)) {
 						Set<Move> allPossibleJumpMoves = GameCommonUtils.allJumpMovesPossible(board, user);
-						for(CheckerPiece piece : board.getPieces(user.getColor())) {
-							Square sq = piece.getBelongsTo();
-							if(sq.isDisable()) 
-								sq.setDisable(false);
-						}
-						if(!allPossibleJumpMoves.isEmpty()) {
+
+						if (!allPossibleJumpMoves.isEmpty()) {
 							Set<CheckerPiece> userPieces = board.getPieces(user.getColor());
 							Iterator<CheckerPiece> itr = userPieces.iterator();
-							Set<Square> jumpSrcSquares = allPossibleJumpMoves.stream().map(jumpMove -> jumpMove.getSrc()).collect(Collectors.toSet());
-							while(itr.hasNext()) {
-								Square src = itr.next().getBelongsTo();
-								if(!jumpSrcSquares.contains(src)) {
-									src.setDisable(true);
+							Set<Square> jumpSrcSquares = allPossibleJumpMoves.stream()
+									.map(jumpMove -> jumpMove.getSrc()).collect(Collectors.toSet());
+							Platform.runLater(() -> {
+								while (itr.hasNext()) {
+									Square src = itr.next().getBelongsTo();
+									if (!jumpSrcSquares.contains(src)) {
+										src.setDisable(true);
+									}
 								}
-							}
+							});
 						}
 						switchActivePlayer();
 						board.setDisable(false);
 					} else {
-						// Game Over
-						System.out.println("Game Terminated");
-						gameOver = true;
-						continue;
+						if (board.getPieceCount(Color.WHITE) > 0 && board.getPieceCount(Color.BLACK) > 0
+								&& GameCommonUtils.hasMoreMoves(cpu, board)) {
+							continue;
+						} else {
+							// Game Over
+							System.out.println("Game Terminated");
+							gameOver = true;
+							continue;
+						}
 					}
 				}
 				// User's Turn
@@ -273,4 +294,5 @@ public class GamePlay {
 		}
 
 	}
+
 }

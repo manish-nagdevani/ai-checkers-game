@@ -19,6 +19,8 @@ import com.game.checkers.players.CPU;
 import com.game.checkers.players.Player;
 import com.game.checkers.players.User;
 
+import javafx.application.Platform;
+
 public class GameCommonUtils {
 	
 	public static boolean hasMoreMoves(Player p, CheckerBoard board) {
@@ -147,6 +149,10 @@ public class GameCommonUtils {
 			difficultyLevels.add(level.toString());
 		}
 		return difficultyLevels;
+	}
+	
+	public static void log(String message) {
+		Platform.runLater(() -> {GamePlay.getInstance().getLoggingArea().appendText(message+"\n");});
 	}
 
 }
