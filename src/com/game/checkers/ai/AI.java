@@ -11,6 +11,12 @@ import com.game.checkers.players.CPU;
 import com.game.checkers.players.Player;
 import com.game.checkers.players.User;
 
+/**
+ * AI Class providing alphabeta functionality for game play
+ * 
+ * @author Manish
+ *
+ */
 public class AI {
 	public Move bestMove;
 	public State root;
@@ -21,16 +27,23 @@ public class AI {
 	private static int numberOfMinPruning = 0;
 	private static int maxDepth = 0;
 	private static int searchCount = 0;
+
 	public AI(State root) {
 		this.root = root;
 		nodesCreated = 1;
 		searchCount++;
 	}
 
-	public static int getNodesCreated() {
-		return nodesCreated;
-	}
-
+	/**
+	 * Function implementing alphabeta logic
+	 * 
+	 * @param state
+	 * @param depth
+	 * @param alpha
+	 * @param beta
+	 * @param isMaxPlayer
+	 * @return
+	 */
 	public int alphaBeta(State state, int depth, int alpha, int beta, boolean isMaxPlayer) {
 		if (depth == 0) {
 			System.out.println("Reached depth = 0");
@@ -46,7 +59,7 @@ public class AI {
 			System.out.println(utilityValue);
 			return utilityValue;
 		}
-		
+
 		int localMaxDepth = 0;
 		if (isMaxPlayer) {
 			int v = Integer.MIN_VALUE;
@@ -94,6 +107,14 @@ public class AI {
 		}
 	}
 
+	/**
+	 * For a given state and player, generate all possible moves a player can
+	 * take and return all the resulting states
+	 * 
+	 * @param initialState
+	 * @param player
+	 * @return
+	 */
 	private List<State> generateAllStates(final State initialState, Player player) {
 		Set<Move> allPossibleMoves = new HashSet<Move>();
 		if (player instanceof CPU) {
@@ -118,6 +139,10 @@ public class AI {
 		return childrenStates;
 	}
 
+	/*
+	 * Getters and Setters
+	 */
+
 	public static int getNumberOfMaxPruning() {
 		return numberOfMaxPruning;
 	}
@@ -129,6 +154,10 @@ public class AI {
 	public static int getSearchCount() {
 		return searchCount;
 	}
+
+	public static int getNodesCreated() {
+		return nodesCreated;
+	}
 	
 	public static int getMaxDepth() {
 		return maxDepth;
@@ -138,6 +167,9 @@ public class AI {
 		AI.maxDepth = maxDepth;
 	}
 
+	/**
+	 * Reset static counters
+	 */
 	public void resetCounters() {
 		nodesCreated = 0;
 		numberOfMaxPruning = 0;
@@ -145,6 +177,9 @@ public class AI {
 		maxDepth = 0;
 	}
 
+	/**
+	 * Clean all objects, using garbage collector
+	 */
 	public void clean() {
 		try {
 			this.finalize();

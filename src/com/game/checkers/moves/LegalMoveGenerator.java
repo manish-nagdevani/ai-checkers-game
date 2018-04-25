@@ -11,6 +11,11 @@ import com.game.checkers.moves.Move.MoveType;
 
 public class LegalMoveGenerator {
 
+	/**
+	 * @param srcSquare
+	 * @param board
+	 * @return Map of all Possible legal moves for a given square
+	 */
 	public static Map<Square, Move> generateLegalMoves(Square srcSquare, final CheckerBoard board) {
 		Map<Square, Move> normalMoves = generateNormalMove(srcSquare, board);
 		Map<Square, Move> jumpMoves = generateJumpMove(srcSquare, board, normalMoves);		
@@ -18,6 +23,11 @@ public class LegalMoveGenerator {
 		return jumpMoves.isEmpty() ? normalMoves : jumpMoves;
 	}
 
+	/**
+	 * @param src
+	 * @param board
+	 * @return Map of Normal moves from a square
+	 */
 	private static Map<Square, Move> generateNormalMove(Square src, final CheckerBoard board) {
 		Map<Square, Move> normalMoves = new HashMap<Square, Move>();
 		int direction = 1; // Moving down on the board
@@ -50,6 +60,12 @@ public class LegalMoveGenerator {
 		return normalMoves;
 	}
 
+	/**
+	 * @param src
+	 * @param board
+	 * @param normalMoves
+	 * @return Map of Jump moves from a square
+	 */
 	private static Map<Square, Move> generateJumpMove(Square src, CheckerBoard board,
 			 Map<Square, Move> normalMoves) {
 		Map<Square, Move> jumpMoves = new HashMap<Square, Move>();

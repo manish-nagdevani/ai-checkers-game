@@ -21,8 +21,19 @@ import com.game.checkers.players.User;
 
 import javafx.application.Platform;
 
+/**
+ * Class contains all the common game functions. Acts as a library of functions
+ * 
+ * @author Manish
+ *
+ */
 public class GameCommonUtils {
 	
+	/**
+	 * @param p
+	 * @param board
+	 * @return true if more moves possible for a player else false 
+	 */
 	public static boolean hasMoreMoves(Player p, CheckerBoard board) {
 		Set<Move> allLegalMoves = new HashSet<Move>();
 		for(CheckerPiece piece : board.getPieces(p.getColor())) {
@@ -33,6 +44,10 @@ public class GameCommonUtils {
 		return (allLegalMoves.size() > 0);
 	}
 	
+	/**
+	 * @param board
+	 * @return true if board has more moves else false
+	 */
 	private static boolean hasMoreMoves(CheckerBoard board) {
 		Set<Move> allLegalMoves = new HashSet<Move>();
 		int destCount = 0;
@@ -73,10 +88,19 @@ public class GameCommonUtils {
 		return (allLegalMoves.size() > 0);
 	}
 	
+	/**
+	 * @param moves
+	 * @return true if moves set has any element
+	 */
 	public static boolean hasMoreMoves(Set<Move> moves) {
 		return (moves.size() > 0);
 	}
 	
+	/**
+	 * @param p
+	 * @param board
+	 * @return true if player has won else false
+	 */
 	public static boolean hasWon(Player p, CheckerBoard board) {
 		Player opponent = null;
 		if(p instanceof User) {
@@ -88,14 +112,29 @@ public class GameCommonUtils {
 		return (board.getPieceCount(p.getColor()) > board.getPieceCount(opponent.getColor()));
 	}
 	
+	/**
+	 * @param x
+	 * @param y
+	 * @param size
+	 * @return true if x,y are within the bounds of the board else false
+	 */
 	public static boolean isWithinLimits(int x, int y, int size) {
 		return (x >= 0 && x < size && y >= 0 && y < size);
 	}
 	
+	/**
+	 * @param state
+	 * @return true is a state is terminal state else false
+	 */
 	public static boolean isTerminalState(State state) {
 		return !hasMoreMoves(state.getBoard());
 	}
 	
+	/**
+	 * @param board
+	 * @param p
+	 * @return set of jump moves for a given player and board
+	 */
 	public static Set<Move> allJumpMovesPossible(CheckerBoard board, Player p) {
 		Set<Move> allLegalMoves = new HashSet<Move>();
 		for(CheckerPiece piece : board.getPieces(p.getColor())) {
@@ -115,6 +154,12 @@ public class GameCommonUtils {
 		return jumpMoves;
 	}
 	
+	/**
+	 * @param state
+	 * @param player
+	 * @param adversary
+	 * @return evaluation value using all the heuristics
+	 */
 	public static int evaluation(State state, Player player, Player adversary) {
 		int h1 = Heuristics.pieceCountHeuristic(state.getBoard(), player, adversary);
 		int h2 = Heuristics.movesToDestHeuristic(state.getBoard(), player, adversary);
@@ -126,6 +171,12 @@ public class GameCommonUtils {
 		return heuristicValue;
 	}
 	
+	/**
+	 * @param state
+	 * @param player
+	 * @param adversary
+	 * @return int value after evaluating the terminal state
+	 */
 	public static int evaluateTerminalState(State state, Player player, Player adversary) {
 		int h1 = Heuristics.pieceCountHeuristic(state.getBoard(), player, adversary);
 		//CPU Wins
@@ -143,6 +194,9 @@ public class GameCommonUtils {
 		return state.getUtilityValue();
 	}
 
+	/**
+	 * @return List<String> of all difficulty levels supported 
+	 */
 	public static List<String> getDificultyLevels() {
 		List<String> difficultyLevels = new ArrayList<>();
 		for(DifficultyLevel level : DifficultyLevel.values()) {
@@ -151,6 +205,10 @@ public class GameCommonUtils {
 		return difficultyLevels;
 	}
 	
+	/**
+	 * Writes a message on to the screen
+	 * @param message
+	 */
 	public static void log(String message) {
 		Platform.runLater(() -> {GamePlay.getInstance().getLoggingArea().appendText(message+"\n");});
 	}

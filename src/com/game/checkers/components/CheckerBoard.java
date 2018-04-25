@@ -14,6 +14,12 @@ import com.game.checkers.players.Player;
 
 import javafx.scene.layout.GridPane;
 
+/**
+ * Represents a checkerboard object
+ * 
+ * @author Manish
+ *
+ */
 public class CheckerBoard extends GridPane {
 
 	private Square[][] squares;
@@ -22,11 +28,21 @@ public class CheckerBoard extends GridPane {
 	private Map<Square, Move> legalMoves;
 	private Map<Color, Set<CheckerPiece>> playerPieces;
 
+	/**
+	 * Creates a new checkerboard object
+	 * 
+	 * @param size
+	 */
 	public CheckerBoard(final int size) {
 		this.size = size;
 		this.squares = new Square[size][size];
 	}
 
+	/**
+	 * Copy constructor
+	 * 
+	 * @param board
+	 */
 	public CheckerBoard(CheckerBoard board) {
 		this.size = board.size;
 		this.squares = new Square[size][size];
@@ -48,6 +64,9 @@ public class CheckerBoard extends GridPane {
 		this.legalMoves = null;
 	}
 
+	/**
+	 * Initialise the board
+	 */
 	public void init() {
 		boolean isWhite = true;
 		for (int row = 0; row < size; row++)
@@ -69,6 +88,9 @@ public class CheckerBoard extends GridPane {
 			}
 	}
 
+	/**
+	 * Place inital pieces / set up initial configuration
+	 */
 	public void placeInitialPieces() {
 		Set<CheckerPiece> whitePieces = new HashSet<CheckerPiece>();
 		Set<CheckerPiece> blackPieces = new HashSet<CheckerPiece>();
@@ -90,6 +112,12 @@ public class CheckerBoard extends GridPane {
 		setPieces(Color.WHITE, whitePieces);
 	}
 
+	/**
+	 * On click of the square, triggers this function
+	 * 
+	 * @param xVal
+	 * @param yVal
+	 */
 	private void onSquareClickEvent(int xVal, int yVal) {
 		Square clickedSquare = this.squares[xVal][yVal];
 		if (clickedSquare.hasCheckerPiece()) {
@@ -142,6 +170,11 @@ public class CheckerBoard extends GridPane {
 		}
 	}
 
+	/**
+	 * Highlights clicked square
+	 * 
+	 * @param s
+	 */
 	public void setActiveSquare(Square s) {
 		// Remove style from old active square
 		if (this.activeSquare != null)
@@ -154,6 +187,9 @@ public class CheckerBoard extends GridPane {
 			this.activeSquare.getStyleClass().add("checker-square-active");
 	}
 
+	/**
+	 * Displays a board on the console -- For debugging purpose only
+	 */
 	public void show() {
 		for (int row = 0; row < size; row++) {
 			for (int col = 0; col < size; col++) {
@@ -172,14 +208,25 @@ public class CheckerBoard extends GridPane {
 		System.out.println("----------------------------------------");
 	}
 
+	/**
+	 * @return
+	 */
 	public Square[][] getSquares() {
 		return squares;
 	}
 
+	/**
+	 * @param squares
+	 */
 	public void setSquares(Square[][] squares) {
 		this.squares = squares;
 	}
 
+	/**
+	 * @param x
+	 * @param y
+	 * @return square
+	 */
 	public Square getSquare(int x, int y) {
 		if (GameCommonUtils.isWithinLimits(x, y, size))
 			return this.squares[x][y];
@@ -187,27 +234,50 @@ public class CheckerBoard extends GridPane {
 
 	}
 
+	/**
+	 * @return size of the board
+	 */
 	public int getSize() {
 		return size;
 	}
 
+	/**
+	 * @return active square
+	 */
 	public Square getActiveSquare() {
 		return activeSquare;
 	}
 
+	/**
+	 * @param playerColor
+	 * @return set of pieces of a given color
+	 */
 	public Set<CheckerPiece> getPieces(Color playerColor) {
 		return playerPieces.get(playerColor);
 	}
 
+	/**
+	 * Kill the piece
+	 * 
+	 * @param piece
+	 */
 	public void killCheckerPiece(CheckerPiece piece) {
 		Set<CheckerPiece> pieces = playerPieces.get(piece.getColor());
 		pieces.remove(piece);
 	}
 
+	/**
+	 * @param color
+	 * @return count of pieces of a color
+	 */
 	public int getPieceCount(Color color) {
 		return playerPieces.get(color) == null ? 0 : playerPieces.get(color).size();
 	}
 
+	/**
+	 * @param color
+	 * @param pieces
+	 */
 	public void setPieces(Color color, Set<CheckerPiece> pieces) {
 		if (playerPieces == null) {
 			playerPieces = new HashMap<Color, Set<CheckerPiece>>();

@@ -15,6 +15,15 @@ import com.game.checkers.moves.LegalMoveGenerator;
 import com.game.checkers.moves.Move;
 import com.game.checkers.moves.Move.MoveType;
 
+/**
+ * Class that plays the game for computer
+ * extends Player
+ * Singleton class
+ * uses AI component to ask alphabeta function the next best move
+ * 
+ * @author Manish
+ *
+ */
 public class CPU extends Player {
 	private static Player cpu = null;
 
@@ -28,9 +37,13 @@ public class CPU extends Player {
 	protected void makeMove(CheckerBoard board) {
 
 	}
-
-	// For all WHITE Color pieces, generate all Possible Moves
-	// If a Jump move is possible, filter all other moves
+	
+	/**
+	 * For all WHITE Color pieces, generate all Possible Moves
+	 * If a Jump move is possible, filter all other moves
+	 * @param board
+	 * @return
+	 */
 	public Set<Move> getNextMove(CheckerBoard board) {
 		Set<CheckerPiece> pieces = board.getPieces(this.getColor());
 		Set<Move> allPossibleMoves = new HashSet<Move>();
@@ -52,10 +65,20 @@ public class CPU extends Player {
 		return jumpMoves.isEmpty() ? allRegularMoves : jumpMoves;
 	}
 
+	/**
+	 * Uses AI to ask for the next best move
+	 * @param board
+	 * @return
+	 */
 	public Move calculateBestMove(CheckerBoard board) {
 		return askAI(new State(board));
 	}
 
+	/**
+	 * Depending on the difficulty level, ask AI for the next best move
+	 * @param state
+	 * @return
+	 */
 	public Move askAI(State state) {
 		AI ai = new AI(state);
 		int maxDepth = 0;
@@ -89,6 +112,10 @@ public class CPU extends Player {
 		return bestMove;
 	}
 
+	/**
+	 * Singleton instance is returned
+	 * @return
+	 */
 	public static Player getInstance() {
 		if (cpu == null) {
 			cpu = new CPU("CPU", Color.WHITE);

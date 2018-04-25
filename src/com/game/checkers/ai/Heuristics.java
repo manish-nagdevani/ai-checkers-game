@@ -7,39 +7,86 @@ import com.game.checkers.components.Square;
 import com.game.checkers.players.Player;
 import com.game.checkers.players.User;
 
+/**
+ * Class containing all the Heuristic functions for the game
+ * 
+ * @author Manish
+ *
+ */
 public class Heuristics {
 
-	// H1
+	
+	/**
+	 * @param board
+	 * @param player
+	 * @param adversary
+	 * @return int difference between the piece count of two players
+	 */
 	public static int pieceCountHeuristic(CheckerBoard board, Player player, Player adversary) {
 		return board.getPieceCount(player.getColor()) - board.getPieceCount(adversary.getColor());
 	}
 
-	// H2
+	
+	/**
+	 * @param board
+	 * @param player
+	 * @param adversary
+	 * @return int difference between sum of moves to destination for each piece of two players
+	 */
 	public static int movesToDestHeuristic(CheckerBoard board, Player player, Player adversary) {
 		return (calcSumOfMovesToDest(board, player) - calcSumOfMovesToDest(board, adversary));
 	}
 
-	// H3
+	
+	/**
+	 * @param board
+	 * @param player
+	 * @param adversary
+	 * @return int dofference between sum of available jump moves for each piece of two players
+	 */
 	public static int availJumpMovesHeuristic(CheckerBoard board, Player player, Player adversary) {
 		return (GameCommonUtils.allJumpMovesPossible(board, player).size()
 				- GameCommonUtils.allJumpMovesPossible(board, adversary).size());
 	}
 
-	// H4
+	
+	/**
+	 * @param board
+	 * @param player
+	 * @param adversary
+	 * @return int difference between sum of all pieces at destination of two players
+	 */
 	public static int piecesOnDestHeuristic(CheckerBoard board, Player player, Player adversary) {
 		return (calcSumOfPiecesToDest(board, player) - calcSumOfPiecesToDest(board, adversary));
 	}
 
-	// H5
+	
+	/**
+	 * @param board
+	 * @param player
+	 * @param adversary
+	 * @return int difference between sum of invulnerable pieces of two players
+	 */
 	public static int numOfInvulnerablePiecesHeuristic(CheckerBoard board, Player player, Player adversary) {
 		return (calcNumOfInvulnerablePieces(board, player) - calcNumOfInvulnerablePieces(board, adversary));
 	}
 
-	// H6
+	
+	/**
+	 * @param board
+	 * @param player
+	 * @param adversary
+	 * @return int difference between sum of support pieces of two players
+	 */
 	public static int supportPiecesHeuristic(CheckerBoard board, Player player, Player adversary) {
 		return (calcSupportPieces(board, player) - calcSupportPieces(board, adversary));
 	}
 
+	/**
+	 * @param board
+	 * @param player
+	 * @return sum of support of poeces for a player
+	 */
 	private static int calcSupportPieces(CheckerBoard board, Player player) {
 		int numOfSupportPieces = 0;
 		for (CheckerPiece piece : board.getPieces(player.getColor())) {
@@ -76,6 +123,11 @@ public class Heuristics {
 		return numOfSupportPieces;
 	}
 
+	/**
+	 * @param board
+	 * @param player
+	 * @return sum of invulnerable pieces for a player
+	 */
 	private static int calcNumOfInvulnerablePieces(CheckerBoard board, Player player) {
 		int numOfInvulnerablePieces = 0;
 		final int boardSize = board.getSize() - 1;
@@ -90,6 +142,11 @@ public class Heuristics {
 		return numOfInvulnerablePieces;
 	}
 
+	/**
+	 * @param board
+	 * @param player
+	 * @return sum of pieces on destination for a player
+	 */
 	private static int calcSumOfPiecesToDest(CheckerBoard board, Player player) {
 		int sumToDest = 0;
 		for (CheckerPiece piece : board.getPieces(player.getColor())) {
@@ -102,6 +159,11 @@ public class Heuristics {
 		return sumToDest;
 	}
 
+	/**
+	 * @param board
+	 * @param player
+	 * @return sum of number of moves required by each piece to reach destination for a player
+	 */
 	private static int calcSumOfMovesToDest(CheckerBoard board, Player player) {
 		int sumToDest = 0;
 		for (CheckerPiece piece : board.getPieces(player.getColor())) {
