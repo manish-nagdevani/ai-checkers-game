@@ -11,23 +11,40 @@ import com.game.checkers.moves.Move.MoveType;
 
 import javafx.application.Platform;
 
+/**
+ * Abstract class representing a Player
+ * 
+ * @author Manish
+ *
+ */
 public abstract class Player {
 	protected String name;
 	protected Color color;
 	protected int score;
 	private DifficultyLevel level = null;
 
+	/**
+	 * @return name of the player
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * @param name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	protected abstract void makeMove(CheckerBoard board);
 
-	// Given a Move, this function actually performs it
+	/**
+	 * Given a Move, this function actually performs it
+	 * 
+	 * @param move
+	 * @param board
+	 */
 	public static void performMove(Move move, CheckerBoard board) {
 		Square srcSq = move.getSrc();
 		srcSq.getStyleClass().add("checker-square-active");
@@ -68,6 +85,11 @@ public abstract class Player {
 		enableAllDisableSquares(board);
 	}
 
+	/**
+	 * Enables all the disabled squares
+	 * 
+	 * @param board
+	 */
 	private static void enableAllDisableSquares(CheckerBoard board) {
 		Platform.runLater(() -> {
 			for (Square[] sq_arr : board.getSquares()) {
@@ -79,6 +101,15 @@ public abstract class Player {
 		});
 	}
 
+	/**
+	 * Given a Move, this function actually performs it -- used by alphabeta
+	 * function
+	 * 
+	 * @param move
+	 * @param board
+	 * @param activePlayer
+	 * @param opponent
+	 */
 	public static void performMove(Move move, CheckerBoard board, Player activePlayer, Player opponent) {
 		enableAllDisableSquares(board);
 		Square srcSq = board.getSquare(move.getSrc().getX(), move.getSrc().getY());
@@ -107,14 +138,23 @@ public abstract class Player {
 		}
 	}
 
+	/**
+	 * @return color of the player
+	 */
 	public Color getColor() {
 		return color;
 	}
 
+	/**
+	 * @return difficulty level of the player
+	 */
 	public DifficultyLevel getLevel() {
 		return level;
 	}
 
+	/**
+	 * @param level
+	 */
 	public void setLevel(DifficultyLevel level) {
 		this.level = level;
 	}

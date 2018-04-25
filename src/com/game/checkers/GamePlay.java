@@ -7,12 +7,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.game.checkers.ai.DifficultyLevel;
-import com.game.checkers.ai.State;
 import com.game.checkers.components.CheckerBoard;
 import com.game.checkers.components.CheckerPiece;
 import com.game.checkers.components.Color;
 import com.game.checkers.components.Square;
-import com.game.checkers.eval.BoardSummary;
 import com.game.checkers.moves.Move;
 import com.game.checkers.players.CPU;
 import com.game.checkers.players.Player;
@@ -29,6 +27,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+/**
+ * Singleton Class Responsible to conduct game play.
+ * Builds the board, checker pieces, Player objects
+ * Responsible for Turn Taking OR Game Loop
+ * 
+ * @author Manish
+ * 
+ */
 public class GamePlay {
 
 	private Player cpu = null;
@@ -42,21 +48,39 @@ public class GamePlay {
 	private GamePlay() {
 	}
 
+	
+	/**
+	 * Initializes the board, Player objects and renders the game GUI
+	 * Marks the start of the game
+	 * 
+	 * @param primaryStage
+	 */
 	public void init(Stage primaryStage) {
 		try {
+			
+			//Ask user for the difficulty level
 			String choice = promptDifficulty();
 			DifficultyLevel cpuLevel = DifficultyLevel.valueOf(choice);
-
+			
+			//Create board
 			board = new CheckerBoard(6);
+			
+			//Initialise Player objects
 			user = User.getInstance();
 			cpu = CPU.getInstance();
+			
+			//Set cpu level as per user's preference
 			cpu.setLevel(cpuLevel);
+			
+			//Ask user if he wants to play first or second
 			promptUserToTakeTurn();
 
+			//Initialise board with initial configuration
 			initializeBoard(board, user, cpu);
-
+			
+			//Display GUI
 			displayBoard(primaryStage, board);
-
+			
 			CpuTurn cpuTurn = new CpuTurn();
 			Thread t = new Thread(cpuTurn);
 			t.start();
@@ -66,6 +90,11 @@ public class GamePlay {
 		}
 	}
 
+	/**
+	 * Ask user to choose the Game Difficulty level
+	 * 
+	 * @return
+	 */
 	private String promptDifficulty() {
 		List<String> options = GameCommonUtils.getDificultyLevels();
 		ChoiceDialog<String> dialog = new ChoiceDialog<String>(options.get(0), options);
@@ -80,6 +109,9 @@ public class GamePlay {
 		return null;
 	}
 
+	/**
+	 * Ask User to choose whether to take turn first or second
+	 */
 	private void promptUserToTakeTurn() {
 		Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle("Checkers Board Game");
@@ -102,16 +134,35 @@ public class GamePlay {
 
 	}
 
+	/**
+	 * Returns true is player is still taking it's turn
+	 * 
+	 * @param player
+	 * @return
+	 */
 	private boolean isPlaying(final Player player) {
 		return activePlayer == player;
 	}
 
+	/**
+	 * Initialise board with inital configuration
+	 * 
+	 * @param board
+	 * @param user
+	 * @param cpu
+	 */
 	private void initializeBoard(CheckerBoard board, Player user, Player cpu) {
 		board.init();
 		board.placeInitialPieces();
 		board.show();
 	}
 
+	/**
+	 * Render board GUI
+	 * 
+	 * @param primaryStage
+	 * @param board
+	 */
 	private void displayBoard(Stage primaryStage, CheckerBoard board) {
 		primaryStage.setTitle("Checkers Game");
 		BorderPane root = new BorderPane();
@@ -124,6 +175,11 @@ public class GamePlay {
 		primaryStage.show();
 	}
 
+	/**
+	 * Generates the Blank Text Area on the board GUI for logging statements
+	 * 
+	 * @return
+	 */
 	private VBox generateLoggerSpace() {
 		loggingArea = new TextArea();
 		loggingArea.setEditable(false);
@@ -133,10 +189,18 @@ public class GamePlay {
 		return vbox;
 	}
 
+	/**
+	 * Returns the player taking turn currently
+	 * 
+	 * @return
+	 */
 	public Player getActivePlayer() {
 		return activePlayer;
 	}
 
+	/**
+	 * Change Active Player
+	 */
 	public void switchActivePlayer() {
 		if (activePlayer instanceof CPU)
 			this.activePlayer = user;
@@ -144,6 +208,11 @@ public class GamePlay {
 			this.activePlayer = cpu;
 	}
 
+	/**
+	 * Returns Singleton object of the GamePlay class
+	 * 
+	 * @return
+	 */
 	public static GamePlay getInstance() {
 		if (gamePlay == null) {
 			gamePlay = new GamePlay();
@@ -152,6 +221,11 @@ public class GamePlay {
 
 	}
 
+	/**
+	 * Determines the winner of the board
+	 * 
+	 * @param player
+	 */
 	private void outputWinner(Player player) {
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle("Game Result");
@@ -179,6 +253,13 @@ public class GamePlay {
 		return loggingArea;
 	}
 
+	/**
+	 * Class implements Runnable, Main logic for Game Loop
+	 * Implemented Logic for turn taking and CPU/AI turn control
+	 * 
+	 * @author Manish
+	 *
+	 */
 	class CpuTurn implements Runnable {
 		@Override
 		public void run() {
@@ -189,18 +270,19 @@ public class GamePlay {
 				if (activePlayer == cpu) {
 					board.setDisable(true);
 
-					// Either Normal moves or Jump Moves
+					// Either Normal moves or Jump Moves - Always
 					Set<Move> allPossibleMoves = ((CPU) cpu).getNextMove(board);
 
 					// Selecting the Move to take if any
 					Move move = null;
 
 					// Game Over
-					if (allPossibleMoves.size() == 0) {
+					if(allPossibleMoves.size() == 0) {
 						System.out.println("Game Over");
 						gameOver = true;
 						continue;
-					} else if (allPossibleMoves.size() == 1) {
+					}
+					else if (allPossibleMoves.size() == 1) {
 						move = allPossibleMoves.iterator().next();
 					} else {
 						Move bestMove = ((CPU) cpu).calculateBestMove(board);
@@ -265,18 +347,8 @@ public class GamePlay {
 					}
 				}
 			}
-
-			BoardSummary bs = new BoardSummary();
-			bs.setCpuPieceCount(board.getPieceCount(cpu.getColor()));
-			bs.setUserPieceCount(board.getPieceCount(user.getColor()));
-			System.out.println(bs);
-
-			State state = new State(board);
-			System.out.println("State Board Hashcode = " + state.getBoard().hashCode());
-			System.out.println("Actual Board Hashcode = " + board.hashCode());
-			System.out.println("State Board Squares array Hashcode = " + state.getBoard().getSquares().hashCode());
-			System.out.println("Actual Board Squares array Hashcode = " + board.getSquares().hashCode());
-
+			
+			//Output Winner
 			if (GameCommonUtils.hasWon(user, board)) {
 				Platform.runLater(() -> {
 					outputWinner(user);

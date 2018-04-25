@@ -12,6 +12,14 @@ import com.game.checkers.moves.LegalMoveGenerator;
 import com.game.checkers.moves.Move;
 import com.game.checkers.moves.Move.MoveType;
 
+/**
+ * Class that plays the game for computer
+ * extends Player.
+ * Singleton class
+ * 
+ * @author Manish
+ *
+ */
 public class User extends Player {
 
 	private static Player user;
@@ -32,6 +40,10 @@ public class User extends Player {
 
 	}
 
+	/**
+	 * @param board
+	 * @return set of next moves
+	 */
 	public Set<Move> getNextMove(CheckerBoard board) {
 		Set<CheckerPiece> pieces = board.getPieces(this.getColor());
 		Set<Move> allPossibleMoves = new HashSet<Move>();
@@ -53,6 +65,9 @@ public class User extends Player {
 		return jumpMoves.isEmpty() ? allRegularMoves : jumpMoves;
 	}
 
+	/**
+	 * @return singleton instance of the class
+	 */
 	public static Player getInstance() {
 		if (user == null) {
 			user = new User("User", Color.BLACK);
