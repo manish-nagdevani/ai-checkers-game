@@ -1,5 +1,5 @@
 .checker-square {
-	/* stage size (400)/8 spaces */
+	/* stage size (400)/6 spaces */
 	-fx-min-height:  67px;
 	-fx-min-width:   67px;
 	-fx-pref-height: 67px;
@@ -25,4 +25,14 @@
 
 .checker-square-legal-suggestion {
 	-fx-background-color: green;
+}
+
+.checker-logger-area {
+	-fx-pref-height: 400px;
+}
+
+.vbox {
+	-fx-padding: 10px;
+	-fx-pref-width: 400px;
+	-fx-max-width: 400px;
 }

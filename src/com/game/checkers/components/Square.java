@@ -21,6 +21,15 @@ public class Square extends Button {
 			this.getStyleClass().add("checker-square-black");
 	}
 
+	public Square(Square square) {
+		this.x = square.getX();
+		this.y = square.getY();
+		this.color = square.getColor();
+		if(square.getCheckerPiece() != null) {
+			this.checkerPiece = new CheckerPiece(square.getCheckerPiece());
+		}
+	}
+
 	public CheckerPiece getCheckerPiece() {
 		return checkerPiece;
 	}
@@ -34,7 +43,6 @@ public class Square extends Button {
 			this.checkerPiece.setBelongsTo(this);
 			Platform.runLater(() -> {
 				this.setGraphic(iv);
-				
 			});
 		} else {
 			javafx.application.Platform.runLater(() -> {
@@ -60,7 +68,6 @@ public class Square extends Button {
 	}
 
 	public CheckerPiece releasePiece() {
-		//this.checkerPiece.setBelongsTo(null);
 		CheckerPiece tmpPiece = this.checkerPiece;
 		setCheckerPiece(null);
 		return tmpPiece;
@@ -78,7 +85,7 @@ public class Square extends Button {
 
 	@Override
 	public String toString() {
-		return "Square [x=" + x + ", y=" + y + ", checkerPiece=" + checkerPiece + ", color=" + color + "]";
+		return "Square @ "+ this.hashCode() +" [x=" + x + ", y=" + y + ", checkerPiece=" + checkerPiece + ", color=" + color + "]";
 	}
 
 }

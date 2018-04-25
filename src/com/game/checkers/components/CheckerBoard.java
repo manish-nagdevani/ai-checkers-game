@@ -1,5 +1,7 @@
 package com.game.checkers.components;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -18,11 +20,32 @@ public class CheckerBoard extends GridPane {
 	private final int size;
 	private Square activeSquare;
 	private Map<Square, Move> legalMoves;
-	private static CheckerBoard board;
+	private Map<Color, Set<CheckerPiece>> playerPieces;
 
-	private CheckerBoard(final int size) {
+	public CheckerBoard(final int size) {
 		this.size = size;
 		this.squares = new Square[size][size];
+	}
+
+	public CheckerBoard(CheckerBoard board) {
+		this.size = board.size;
+		this.squares = new Square[size][size];
+		playerPieces = new HashMap<Color, Set<CheckerPiece>>();
+		for (int row = 0; row < size; row++) {
+			for (int col = 0; col < size; col++) {
+				squares[row][col] = new Square(board.getSquare(row, col));
+				if (squares[row][col].getCheckerPiece() != null) {
+					squares[row][col].getCheckerPiece().setBelongsTo(squares[row][col]);
+					Set<CheckerPiece> set = playerPieces.get(squares[row][col].getCheckerPiece().getColor());
+					if (set == null) {
+						set = new HashSet<CheckerPiece>();
+					}
+					set.add(squares[row][col].getCheckerPiece());
+					playerPieces.put(squares[row][col].getCheckerPiece().getColor(), set);
+				}
+			}
+		}
+		this.legalMoves = null;
 	}
 
 	public void init() {
@@ -46,7 +69,7 @@ public class CheckerBoard extends GridPane {
 			}
 	}
 
-	public void placeInitialPieces(Player p1, Player p2) {
+	public void placeInitialPieces() {
 		Set<CheckerPiece> whitePieces = new HashSet<CheckerPiece>();
 		Set<CheckerPiece> blackPieces = new HashSet<CheckerPiece>();
 
@@ -63,37 +86,40 @@ public class CheckerBoard extends GridPane {
 					}
 				}
 			}
-
-		if (p1.getColor() == Color.BLACK) {
-			p1.setPieces(blackPieces);
-			p2.setPieces(whitePieces);
-		} else {
-			p2.setPieces(blackPieces);
-			p1.setPieces(whitePieces);
-		}
+		setPieces(Color.BLACK, blackPieces);
+		setPieces(Color.WHITE, whitePieces);
 	}
 
 	private void onSquareClickEvent(int xVal, int yVal) {
 		Square clickedSquare = this.squares[xVal][yVal];
-		
-		//1st click capture
-		if (activeSquare == null && clickedSquare.hasCheckerPiece()) {
-			activeSquare = clickedSquare;
-			setActiveSquare(clickedSquare);
-			legalMoves = LegalMoveGenerator.generateLegalMoves(activeSquare, this);
-			for (Move m : legalMoves.values()) {
-				if (!m.getDest().hasCheckerPiece()) {
-					this.getSquare(m.getDest().getX(), m.getDest().getY()).getStyleClass()
-							.removeAll("checker-square-legal-suggestion");
-					this.getSquare(m.getDest().getX(), m.getDest().getY()).getStyleClass()
-							.add("checker-square-legal-suggestion");
-					System.out.println(
-							m.getType().toString() + "(" + m.getDest().getX() + ", " + m.getDest().getY() + ")");
-				} else {
-					legalMoves.remove(m);
-				}
+		if (clickedSquare.hasCheckerPiece()) {
+			if (clickedSquare.getCheckerPiece().getColor() == Color.WHITE) {
+				System.out.println("That's not your Piece");
+				return;
 			}
+		}
 
+		// 1st click capture
+		if (activeSquare == null) {
+			if (clickedSquare.hasCheckerPiece()) {
+				activeSquare = clickedSquare;
+				setActiveSquare(clickedSquare);
+				legalMoves = LegalMoveGenerator.generateLegalMoves(activeSquare, this);
+				for (Move m : legalMoves.values()) {
+					if (!m.getDest().hasCheckerPiece()) {
+						this.getSquare(m.getDest().getX(), m.getDest().getY()).getStyleClass()
+								.removeAll("checker-square-legal-suggestion");
+						this.getSquare(m.getDest().getX(), m.getDest().getY()).getStyleClass()
+								.add("checker-square-legal-suggestion");
+						System.out.println(
+								m.getType().toString() + "(" + m.getDest().getX() + ", " + m.getDest().getY() + ")");
+					} else {
+						legalMoves.remove(m);
+					}
+				}
+			} else {
+				System.out.println("No Piece on this cell");
+			}
 		} else {
 			if (!clickedSquare.hasCheckerPiece()) {
 				if (this.legalMoves.keySet().contains(clickedSquare)) {
@@ -102,7 +128,6 @@ public class CheckerBoard extends GridPane {
 					this.activeSquare.getStyleClass().removeAll("checker-square-active");
 					this.activeSquare = null;
 					GamePlay.getInstance().switchActivePlayer();
-					//GamePlay.getInstance().playCPU(this);
 				} else {
 					System.out.println("Not a legal Move. Please try again");
 				}
@@ -144,6 +169,7 @@ public class CheckerBoard extends GridPane {
 			}
 			System.out.println();
 		}
+		System.out.println("----------------------------------------");
 	}
 
 	public Square[][] getSquares() {
@@ -164,11 +190,36 @@ public class CheckerBoard extends GridPane {
 	public int getSize() {
 		return size;
 	}
-	
-	public static CheckerBoard getInstance(int size) {
-		if(board == null) {
-			board = new CheckerBoard(size);
-		}
-		return board;
+
+	public Square getActiveSquare() {
+		return activeSquare;
 	}
+
+	public Set<CheckerPiece> getPieces(Color playerColor) {
+		return playerPieces.get(playerColor);
+	}
+
+	public void killCheckerPiece(CheckerPiece piece) {
+		Set<CheckerPiece> pieces = playerPieces.get(piece.getColor());
+		pieces.remove(piece);
+	}
+
+	public int getPieceCount(Color color) {
+		return playerPieces.get(color) == null ? 0 : playerPieces.get(color).size();
+	}
+
+	public void setPieces(Color color, Set<CheckerPiece> pieces) {
+		if (playerPieces == null) {
+			playerPieces = new HashMap<Color, Set<CheckerPiece>>();
+		}
+		playerPieces.put(color, pieces);
+	}
+
+	@Override
+	public String toString() {
+		return "CheckerBoard @" + hashCode() + " [squares=" + Arrays.toString(squares) + ", size=" + size
+				+ ", activeSquare=" + activeSquare + ", legalMoves=" + legalMoves + ", playerPieces=" + playerPieces
+				+ "]";
+	}
+
 }
